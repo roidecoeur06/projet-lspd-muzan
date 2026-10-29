@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LSPD - Académie & Manuel Rookie</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- BARRE DE NAVIGATION -->
+    <nav class="top-nav">
+        <div class="nav-brand">
+            <span class="brand-title">LSPD <span>ACADEMY</span></span>
+        </div>
+
+        <div class="nav-links">
+            <button id="nav-btn-home" class="btn btn-nav active">📚 Modules</button>
+            <button id="nav-btn-my-fiche" class="btn btn-nav">📋 Ma Fiche Rookie</button>
+            <button id="nav-btn-roster" class="btn btn-nav nav-trainer-btn">📊 Suivi Roster</button>
+            <button id="nav-btn-rdv" class="btn btn-nav nav-badge-container">
+                📅 Rendez-vous
+                <span id="rdv-badge" class="nav-badge hidden">0</span>
+            </button>
+        </div>
+
+        <div class="nav-user" id="nav-user-zone">
+            <button id="btn-login-modal" class="btn btn-glow">🔒 Connexion Agent</button>
+        </div>
+    </nav>
+
+    <!-- MODAL DE CONNEXION AGENT -->
+    <div id="login-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <span class="close-modal">&times;</span>
+            <div class="modal-header">
+                <span class="modal-badge">AUTHENTIFICATION</span>
+                <h2>Espace Sécurisé <span>LSPD</span></h2>
+            </div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="matricule-input">Matricule Officier :</label>
+                    <input type="text" id="matricule-input" placeholder="Ex: 42, 07, 105" autocomplete="off" required>
+                </div>
+                <div class="form-group">
+                    <label for="role-select">Niveau d'Accès :</label>
+                    <select id="role-select">
+                        <option value="rookie">Rookie (Recrue)</option>
+                        <option value="trainer">Instructeur / Formateur</option>
+                    </select>
+                </div>
+                <div class="form-group" id="password-group">
+                    <label for="password-input" id="password-label">Code Secret Recrue :</label>
+                    <input type="password" id="password-input" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-glow btn-full">Se Connecter au Système</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL D'AJOUT DE RECRUE (FORMATEUR) -->
+    <div id="add-rookie-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <span class="close-modal" id="close-add-modal">&times;</span>
+            <div class="modal-header">
+                <span class="modal-badge badge-gold">NOUVEAU DOSSIER</span>
+                <h2>Créer une Fiche <span>Recrue</span></h2>
+            </div>
+            <form id="add-rookie-form">
+                <div class="form-group">
+                    <label for="new-mat-input">Matricule Attribué :</label>
+                    <input type="text" id="new-mat-input" placeholder="Ex: 88" autocomplete="off" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-name-input">Nom & Prénom de l'Agent :</label>
+                    <input type="text" id="new-name-input" placeholder="Ex: John Doe" autocomplete="off" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-pass-input">Mot de Passe / Code PIN par Défaut :</label>
+                    <input type="text" id="new-pass-input" value="1234" autocomplete="off" required>
+                    <small class="input-hint">Transmettez ce code à la recrue pour sa première connexion.</small>
+                </div>
+                <button type="submit" class="btn btn-glow btn-full">Enregistrer la Recrue</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- POPUP DE CONFIRMATION DE SUPPRESSION DE FICHE -->
+    <div id="delete-confirm-modal" class="modal hidden">
+        <div class="modal-content glass-card text-center">
+            <div class="locked-icon" style="font-size: 3rem; margin-bottom: 10px;">⚠️</div>
+            <h2 style="margin-bottom: 10px;">Supprimer la Fiche ?</h2>
+            <p id="delete-confirm-text" style="color: var(--text-secondary); margin-bottom: 25px;">Voulez-vous vraiment supprimer cette recrue du roster ?</p>
+            <div class="quiz-result-actions">
+                <button id="btn-cancel-delete" class="btn btn-secondary">← Revenir</button>
+                <button id="btn-confirm-delete" class="btn btn-danger" style="padding: 10px 20px; font-size: 0.9rem;">Supprimer Définitivement</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- POPUP DE NOTIFICATION UNIVERSEL (Remplace tous les alert()) -->
+    <div id="app-alert-modal" class="modal hidden">
+        <div class="modal-content glass-card text-center">
+            <div id="app-alert-icon" style="font-size: 3rem; margin-bottom: 10px;">💬</div>
+            <h2 id="app-alert-title" style="margin-bottom: 10px;">Notification</h2>
+            <p id="app-alert-message" style="color: var(--text-secondary); margin-bottom: 25px; line-height: 1.5;"></p>
+            <button id="btn-close-app-alert" class="btn btn-glow">Compris</button>
+        </div>
+    </div>
+
+    <!-- POPUP DE NOTIFICATION DE TRANSMISSION QCM -->
+    <div id="qcm-success-modal" class="modal hidden">
+        <div class="modal-content glass-card text-center">
+            <div class="locked-icon" style="font-size: 3rem; margin-bottom: 10px;">📨</div>
+            <h2 style="margin-bottom: 10px;">Transmission <span>Réussie</span></h2>
+            <p style="color: var(--text-secondary); margin-bottom: 25px;">Vos résultats de QCM ont bien été envoyés aux formateurs et inscrits sur le Roster !</p>
+            <button id="btn-close-qcm-success" class="btn btn-glow">Compris</button>
+        </div>
+    </div>
+
+    <!-- POPUP DE NOTIFICATION DE RENDEZ-VOUS ENVOYÉ -->
+    <div id="rdv-success-modal" class="modal hidden">
+        <div class="modal-content glass-card text-center">
+            <div class="locked-icon" style="font-size: 3rem; margin-bottom: 10px;">📅</div>
+            <h2 style="margin-bottom: 10px;">Demande <span>Envoyée</span></h2>
+            <p style="color: var(--text-secondary); margin-bottom: 25px;">Votre demande de rendez-vous a bien été envoyée au formateur !</p>
+            <button id="btn-close-rdv-success" class="btn btn-glow">Compris</button>
+        </div>
+    </div>
+
+    <!-- MODAL DE FEEDBACK / COMMENTAIRE DE MODULE (ROSTER) -->
+    <div id="module-feedback-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <span class="close-modal" id="close-module-feedback">&times;</span>
+            <div class="modal-header">
+                <span class="modal-badge">TRAINING DIVISION</span>
+                <h2>Feedback <span>Module</span></h2>
+            </div>
+            <form id="module-feedback-form">
+                <p id="module-feedback-subtitle" style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 15px; text-align: center;"></p>
+                <div class="form-group">
+                    <label for="module-feedback-input">Commentaire / Remarques :</label>
+                    <textarea id="module-feedback-input" rows="4" placeholder="Ex: Bonne maîtrise, attention aux détails..." style="width: 100%; padding: 12px 16px; background: var(--bg-subcard); border: 1px solid var(--border-card); color: var(--text-primary); border-radius: 10px; outline: none; resize: vertical;"></textarea>
+                </div>
+                <div class="quiz-result-actions" style="margin-top: 20px;">
+                    <button type="button" id="btn-cancel-module-feedback" class="btn btn-secondary">Annuler</button>
+                    <button type="submit" class="btn btn-glow">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE FEEDBACK / COMMENTAIRE DE RENDEZ-VOUS -->
+    <div id="rdv-feedback-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <span class="close-modal" id="close-rdv-feedback">&times;</span>
+            <div class="modal-header">
+                <span class="modal-badge">TRAINING DIVISION</span>
+                <h2>Notes & <span>Feedback RDV</span></h2>
+            </div>
+            <form id="rdv-feedback-form">
+                <div class="form-group">
+                    <label for="rdv-feedback-input">Compte-rendu / Remarques pour l'agent :</label>
+                    <textarea id="rdv-feedback-input" rows="4" placeholder="Ex: Élève très appliqué, révision des codes 10-XX validée sur le terrain..." required style="width: 100%; padding: 12px 16px; background: var(--bg-subcard); border: 1px solid var(--border-card); color: var(--text-primary); border-radius: 10px; outline: none; resize: vertical;"></textarea>
+                </div>
+                <button type="submit" class="btn btn-glow btn-full">💾 Enregistrer et Clôturer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ACCUEIL : MODULES + SECTIONS DÉFILANTES EN BAS -->
+    <div id="home-view">
+        <header class="main-header">
+            <div class="badge glow-badge">TRAINING DIVISION LSPD</div>
+            <h1>Académie <span>LSPD</span></h1>
+            <p>Portail tactique d'apprentissage, d'évaluation et de suivi des qualifications officielles.</p>
+        </header>
+
+        <main class="formations-container">
+            <div class="card glass-card" data-module="ls1">
+                <div class="card-tag">MODULE LS 1</div>
+                <h2>🔰 Formation Initiale LSPD</h2>
+                <p>Matériel, hiérarchie, unités (MCD & S.W.A.T) et spécialisations.</p>
+                <button class="btn view-btn">Consulter le module</button>
+            </div>
+            <div class="card glass-card" data-module="ls2">
+                <div class="card-tag">MODULE LS 2</div>
+                <h2>⚖️ Procédures Pénales & Rapports</h2>
+                <p>Guide de rédaction, chronologie, droits Miranda, fouilles et saisies officielles.</p>
+                <button class="btn view-btn">Consulter le module</button>
+            </div>
+            <div class="card glass-card" data-module="ls3">
+                <div class="card-tag">MODULE LS 3</div>
+                <h2>🚓 Formation Patrouille</h2>
+                <p>Types d'unités, dispatch MDT, rôles en patrouille et contrôles routiers.</p>
+                <button class="btn view-btn">Consulter le module</button>
+            </div>
+            <div class="card glass-card" data-module="ls4">
+                <div class="card-tag">MODULE LS 4</div>
+                <h2>📻 Procédure Radio & Codes 10-XX</h2>
+                <p>Liste exhaustive des codes 10-XX, codes d'urgence et cas pratiques.</p>
+                <button class="btn view-btn">Consulter le module</button>
+            </div>
+            <div class="card glass-card" data-module="ls5">
+                <div class="card-tag">MODULE LS 5</div>
+                <h2>🎯 Formation Opération</h2>
+                <p>Périmètres de sécurité, gestion d'assauts et interventions de crise.</p>
+                <button class="btn view-btn">Consulter le module</button>
+            </div>
+            <div class="card glass-card" data-module="ls6">
+                <div class="card-tag">MODULE LS 6</div>
+                <h2>🏎️ Formation Conduite</h2>
+                <p>Pilotage prioritaire Code 3, manœuvres PIT et poursuites.</p>
+                <button class="btn view-btn">Consulter le module</button>
+            </div>
+        </main>
+
+        <div class="dashboard-container home-interactive-container">
+            <section class="glass-card module-interactive-box">
+                <div class="box-header">
+                    <h2>🃏 Révision Interactive des Codes 10-XX</h2>
+                    <p>Cliquez sur la carte pour la retourner et vérifier vos connaissances radio.</p>
+                </div>
+                <div class="flashcard-wrapper">
+                    <div class="flashcard" id="flashcard-element">
+                        <div class="flashcard-face flashcard-front glass-card">
+                            <span class="flashcard-label">CODE RADIO</span>
+                            <h3 id="card-code">10-56</h3>
+                            <p class="hint">Cliquez pour retourner 🔄</p>
+                        </div>
+                        <div class="flashcard-face flashcard-back glass-card">
+                            <span class="flashcard-label">SIGNIFICATION</span>
+                            <h3 id="card-meaning">Refus d'obtempérer</h3>
+                            <p id="card-category" class="sub-hint">Patrouille / Poursuite</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flashcard-controls">
+                    <button id="fc-prev" class="btn btn-secondary">← Précédent</button>
+                    <span id="fc-counter" class="badge">1 / 20</span>
+                    <button id="fc-next" class="btn btn-glow">Suivant →</button>
+                    <button id="fc-random" class="btn btn-secondary">🔀 Aléatoire</button>
+                </div>
+            </section>
+
+            <section class="glass-card module-interactive-box" style="margin-top: 40px; position: relative;">
+                <div id="qcm-auth-banner" class="qcm-auth-banner hidden">
+                    <div class="locked-icon" style="font-size: 2.5rem; margin-bottom: 10px;">🔒</div>
+                    <h3>Connexion Requise</h3>
+                    <p>Vous devez être connecté avec votre matricule pour transmettre vos résultats de QCM au Roster.</p>
+                    <button id="btn-qcm-inline-login" class="btn btn-glow" style="margin-top: 15px;">🔑 Se Connecter Maintenant</button>
+                </div>
+
+                <div class="box-header">
+                    <h2>📝 Évaluation QCM Rapide (5s / Question)</h2>
+                    <p>Répondez aux questions avant la fin du temps imparti !</p>
+                </div>
+
+                <div id="quiz-start-screen" class="text-center">
+                    <p style="color: var(--text-secondary); margin-bottom: 25px;">
+                        Le test contient 10 questions. Vous disposez de <strong>5 secondes par question</strong>.
+                    </p>
+                    <button id="btn-start-quiz" class="btn btn-glow btn-large">🚀 Commencer le QCM</button>
+                </div>
+
+                <div id="quiz-active-screen" class="hidden">
+                    <div class="quiz-timer-bar-bg">
+                        <div id="quiz-timer-bar-fill" class="quiz-timer-bar-fill"></div>
+                    </div>
+                    <div class="quiz-status-bar">
+                        <span id="quiz-q-counter" class="badge">Question 1 / 10</span>
+                        <span id="quiz-timer-text" class="timer-badge">⏳ 5s</span>
+                    </div>
+                    <div id="quiz-single-question" class="quiz-single-card"></div>
+                </div>
+
+                <div id="quiz-result-box" class="quiz-result text-center hidden">
+                    <h3>Résultat de l'Évaluation</h3>
+                    <div class="score-display" id="quiz-score-text">0 / 10</div>
+                    <p id="quiz-feedback-text"></p>
+                    <div class="quiz-result-actions">
+                        <button id="btn-restart-quiz" class="btn btn-secondary">🔄 Recommencer</button>
+                        <button id="btn-send-quiz-result" class="btn btn-glow">✉️ Transmettre au Roster Training Division</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- VUE DÉTAILLÉE D'UN MODULE -->
+    <div id="detail-view" class="hidden">
+        <div class="detail-wrapper">
+            <button id="back-btn" class="btn btn-secondary">← Retour aux modules</button>
+            <article id="detail-content" class="detail-card glass-card"></article>
+        </div>
+    </div>
+
+    <!-- PAGE RENDEZ-VOUS -->
+    <div id="rdv-view" class="dashboard-container hidden">
+        <div id="rdv-content-wrapper" class="rdv-protected-zone">
+            <div id="rdv-lock-overlay" class="rdv-lock-overlay hidden">
+                <div class="locked-card glass-card rdv-floating-lock">
+                    <div class="locked-icon">🔒</div>
+                    <h2>Authentification <span>Requise</span></h2>
+                    <p>Vous devez être connecté avec votre matricule pour accéder au centre de réservation.</p>
+                    <button id="btn-open-rdv-login" class="btn btn-glow" style="margin-top: 25px;">🔑 Se Connecter</button>
+                </div>
+            </div>
+
+            <div class="dashboard-header">
+                <h2>📅 Centre de Gestion des Rendez-Vous</h2>
+                <p>Réservation de créneaux de formation avec les Instructeurs du Département.</p>
+            </div>
+
+            <div class="rdv-section glass-card">
+                <h3>📝 Demander un créneau de formation</h3>
+                <form id="rdv-form" class="rdv-form">
+                    <div class="form-group">
+                        <label for="rdv-module">Module souhaité :</label>
+                        <select id="rdv-module" required>
+                            <option value="LS 1 - Formation Initiale">LS 1 - Formation Initiale</option>
+                            <option value="LS 2 - Procédures Pénales">LS 2 - Procédures Pénales</option>
+                            <option value="LS 3 - Formation Patrouille">LS 3 - Formation Patrouille</option>
+                            <option value="LS 4 - Procédure Radio & 10-XX">LS 4 - Procédure Radio & 10-XX</option>
+                            <option value="LS 5 - Formation Opération">LS 5 - Formation Opération</option>
+                            <option value="LS 6 - Formation Conduite">LS 6 - Formation Conduite</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="rdv-date">Disponibilité (Date & Heure) :</label>
+                        <input type="text" id="rdv-date" placeholder="Ex: Demain vers 21h00" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="rdv-notes">Précisions (Optionnel) :</label>
+                        <input type="text" id="rdv-notes" placeholder="Ex: Révision manœuvres PIT">
+                    </div>
+                    <button type="submit" id="rdv-submit-btn" class="btn btn-glow">Soumettre la Demande</button>
+                </form>
+                <div id="rookie-rdv-list" class="rdv-history"></div>
+            </div>
+
+            <div class="trainer-rdv-box" style="margin-top: 35px;">
+                <h3>📬 Demandes en Attente (Vue Instructeur)</h3>
+                <div id="trainer-rdv-list" class="rdv-grid"></div>
+            </div>
+
+            <!-- SECTION DES LOGS DES RENDEZ-VOUS (VISIBLE FORMATEUR) -->
+            <div id="trainer-rdv-logs-box" class="glass-card" style="margin-top: 35px; padding: 25px;">
+                <h3>📜 Historique / Logs des Prises en Charge</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 15px;">Traçabilité des rendez-vous traités par les formateurs.</p>
+                <div id="trainer-rdv-logs-list" class="rdv-logs-container">
+                    <p style="color: var(--text-secondary)">Aucun log enregistré.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ÉCRANS VERROUILLÉS -->
+    <div id="roster-locked-view" class="dashboard-container hidden">
+        <div class="locked-card glass-card">
+            <div class="locked-icon">🛡️</div>
+            <h2>Accès Restreint <span>Training Division</span></h2>
+            <p>Le Tableau Roster et la validation des modules sont réservés aux Formateurs habilités.</p>
+            <button id="btn-open-trainer-login" class="btn btn-glow" style="margin-top: 25px;">Se Connecter comme Instructeur</button>
+        </div>
+    </div>
+
+    <div id="fiche-locked-view" class="dashboard-container hidden">
+        <div class="locked-card glass-card">
+            <div class="locked-icon">📋</div>
+            <h2>Fiche de Suivi <span>Personnelle</span></h2>
+            <p>Connectez-vous avec votre matricule et votre code secret pour accéder à votre livret.</p>
+            <button id="btn-open-rookie-login" class="btn btn-glow" style="margin-top: 25px;">🔑 Connexion Agent / Recrue</button>
+        </div>
+    </div>
+
+    <!-- FICHE ROOKIE -->
+    <div id="rookie-dashboard" class="dashboard-container hidden">
+        <div class="rookie-profile-card glass-card">
+            <div class="profile-header-info">
+                <div class="avatar-badge">👮‍♂️</div>
+                <div>
+                    <h2 id="rookie-name-display">Agent Recruit</h2>
+                    <p class="matricule-tag">Matricule <span id="rookie-matricule-display">#--</span></p>
+                </div>
+            </div>
+
+            <div class="progress-section">
+                <div class="progress-labels">
+                    <span>Progression Globale de Qualification</span>
+                    <strong id="progress-percent">0%</strong>
+                </div>
+                <div class="progress-bar-bg">
+                    <div id="progress-bar-fill" class="progress-bar-fill" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <div class="profile-meta-grid">
+                <div class="meta-item">
+                    <span class="meta-label">Dernier Score QCM</span>
+                    <strong id="rookie-qcm-display">Non effectué</strong>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Statut d'Assermentation</span>
+                    <strong id="rookie-global-status">⏳ Formation en cours</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-header" style="margin-top: 35px;">
+            <h3>📋 Livret de Validation des Modules & Feedbacks</h3>
+            <p>Suivi en direct de la validation de vos modules et des commentaires laissés par la Training Division.</p>
+        </div>
+        <div class="status-grid" id="rookie-status-grid"></div>
+    </div>
+
+    <!-- TABLEAU FORMATEUR -->
+    <div id="trainer-dashboard" class="dashboard-container hidden">
+        <div class="dashboard-header">
+            <h2>📊 Tableau de Suivi Instructeur (Roster LSPD)</h2>
+            <p>Gestion en temps réel des qualifications, codes secrets et fiches d'agents.</p>
+        </div>
+
+        <div class="table-controls">
+            <input type="text" id="search-rookie" placeholder="🔍 Rechercher par matricule ou nom..." class="table-search">
+            <button id="btn-open-add-rookie" class="btn btn-glow">+ Ajouter une Recrue</button>
+        </div>
+
+        <div class="excel-table-wrapper glass-card">
+            <table class="excel-table">
+                <thead>
+                    <tr>
+                        <th>Matricule</th>
+                        <th>Nom / Prénom</th>
+                        <th>Code PIN</th>
+                        <th>LS 1</th>
+                        <th>LS 2</th>
+                        <th>LS 3</th>
+                        <th>LS 4</th>
+                        <th>LS 5</th>
+                        <th>LS 6</th>
+                        <th>Score QCM</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="roster-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
